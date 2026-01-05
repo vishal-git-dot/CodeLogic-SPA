@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CodeLogic — Modern UI (Single File SPA)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Reset & Base ---------- */
+    :root{
+      --bg:#0b0b0d;
+      --card:#0f1115;
+      --muted:#98a0b3;
+      --accent:#ff004c;
+      --accent-2:#ff336a;
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --success: #25c06e;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:linear-gradient(180deg,#07070a 0%, #0f1113 100%);
+      color:#fff; font-family:'Poppins',system-ui,Segoe UI,Roboto,Arial;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    a{color:inherit;text-decoration:none}
+
+    img.icon{width:48px;height:48px;display:block;margin:0 auto 10px}
+
+    /* ---------- Layout ---------- */
+    .app{
+      min-height:100vh; display:flex; flex-direction:column;
+    }
+
+    header.topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 28px; backdrop-filter: blur(6px); background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 6px 30px rgba(255,0,76,0.12);
+    }
+    .brand h1{font-size:1.05rem;margin:0}
+    .nav-actions{display:flex;gap:10px;align-items:center}
+
+    /* ---------- Hero ---------- */
+    .hero{
+      display:grid;grid-template-columns:1fr;align-items:center;padding:48px 28px;gap:30px;
+      position:relative;overflow:hidden;
+    }
+    .hero-inner{
+      max-width:1200px;margin:0 auto;display:flex;gap:40px;align-items:center;flex-wrap:wrap;
+    }
+    .hero-card{
+      flex:1 1 420px;background:linear-gradient(180deg, var(--card), rgba(255,255,255,0.02));border-radius:14px;padding:28px;
+      box-shadow: 0 10px 40px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);
+      transition: transform .45s cubic-bezier(.2,.9,.2,1), box-shadow .45s;
+    }
+    .hero-card:hover{transform:translateY(-8px);box-shadow:0 22px 70px rgba(0,0,0,0.6)}
+
+    .hero h2{font-size:2.6rem;margin:0 0 8px}
+    .hero p{color:var(--muted);line-height:1.6}
+    .cta-row{display:flex;gap:14px;margin-top:18px}
+    .btn{padding:12px 18px;border-radius:12px;border:0;cursor:pointer;font-weight:600}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 10px 30px rgba(255,0,76,0.12)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff}
+
+    /* ---------- Grid Sections ---------- */
+    .container{width:92%;max-width:1200px;margin:30px auto}
+    .section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .section-title h3{margin:0;font-size:1.1rem}
+
+    .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+    .card{
+      background:linear-gradient(180deg,var(--glass),var(--glass-2));padding:22px;border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,0.03);
+      transition:transform .35s,box-shadow .35s,border-color .35s;cursor:pointer;backdrop-filter: blur(6px);
+    }
+    .card:hover{transform:translateY(-8px);box-shadow:0 18px 60px rgba(0,0,0,0.6);border-color:rgba(255,0,76,0.15)}
+
+    .lang-name{margin-top:6px;font-weight:600}
+    .lang-sub{color:var(--muted);font-size:0.85rem}
+
+    /* ---------- Challenge Area ---------- */
+    .challenge-wrap{display:grid;grid-template-columns: 1fr 420px;gap:20px}
+    @media(max-width:980px){.challenge-wrap{grid-template-columns:1fr}}
+
+    .problem{background:linear-gradient(180deg,#0f1316,#0b0d10);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .problem h4{margin:0 0 8px}
+    .problem p{color:var(--muted);line-height:1.6}
+
+    .editor{background:#010101;border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,0.03)}
+    .editor textarea{width:100%;height:260px;background:transparent;border:0;color:#dfe7ff;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace;font-size:14px;resize:vertical}
+    .editor .run-row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
+    .output{background:#06060a;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);min-height:56px;color:var(--muted);font-family:ui-monospace,monospace}
+
+    /* ---------- Dashboard ---------- */
+    .stats{display:flex;gap:12px;flex-wrap:wrap}
+    .stat{background:linear-gradient(180deg,#121316,#0b0b0d);padding:16px;border-radius:12px;min-width:160px;text-align:center}
+    .stat .num{font-size:1.4rem;font-weight:700}
+    .solved-list{margin-top:14px;background:linear-gradient(180deg,#0e1113,#08090b);padding:12px;border-radius:10px}
+
+    /* ---------- Footer ---------- */
+    footer{padding:28px;text-align:center;color:var(--muted);font-size:0.95rem}
+
+    /* ---------- Micro animations ---------- */
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.04);font-weight:600}
+    .chip{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:0.85rem}
+
+    /* ---------- Responsive tweaks ---------- */
+    @media(max-width:780px){
+      .hero h2{font-size:1.6rem}
+      .brand h1{display:none}
+    }
+
+    /* new codes */
+    @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+    from { transform: scale(.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+    button {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 14px;
+    }
+    .card, .challenge-card {
+    padding: 16px !important;
+    }
+    h1, h2 {
+    font-size: 1.6rem;
+    }
+    }
+
+    button {
+    transition: transform .2s ease, box-shadow .25s ease;
+    }
+
+    button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0,0,0,.15);
+    }
+
+    button:focus-visible {
+    outline: 3px solid #1a4dff;
+    outline-offset: 4px;
+    }
+
+    .badge-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .badge {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: linear-gradient(135deg,#ffdd66,#ffb300);
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 3px 8px rgba(0,0,0,.2);
+      animation: popIn .5s ease;
+    }
+    .focus-ring {
+    outline: 3px solid #0af !important;
+    outline-offset: 3px !important;
+    }
+
+    /* ---------- Custom Toast toast ---------- */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ff004c, #ff336a);
+      padding: 14px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(255,0,76,0.35);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: toastIn 0.35s forwards, toastOut 0.35s 4.7s forwards;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(-10px); }
+    }
+
+
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">CL</div>
+        <div>
+          <h1>CodeLogic</h1>
+          <div style="font-size:12px;color:var(--muted)">Sharpen your coding logic</div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <div id="user-greet" style="color:var(--muted); cursor:pointer;" onclick="goToDashboard()"></div>
+        <button class="btn btn-ghost" onclick="nav('languages')">Languages</button>
+        <button class="btn" id="cta-start" onclick="startFlow()">Get Started</button>
+      </div>
+    </header>
+
+    <!-- HERO (Landing) -->
+    <main>
+      <section id="view-landing" class="hero">
+        <div class="hero-inner">
+          <div class="hero-card">
+            <h2>Master coding logic with beautiful, distraction-free challenges</h2>
+            <p>Interactive challenges, instant feedback, smooth animations and a modern experience inspired by the likes of Netflix and Instagram — focused on building your algorithmic intuition.</p>
+            <div class="cta-row">
+              <button class="btn btn-primary" onclick="startFlow()">Start Practicing</button>
+              <button class="btn btn-ghost" onclick="nav('signup')">Sign Up</button>
+            </div>
+          </div>
+
+          <div class="hero-card" style="display:flex;flex-direction:column;justify-content:center;">
+            <h3 style="margin-bottom:12px">Why CodeLogic?</h3>
+            <div style="display:flex;gap:10px;flex-direction:column">
+              <div class="chip">Short logic-first challenges</div>
+              <div class="chip">Instant runnable editor (JS)</div>
+              <div class="chip">Progress saved locally</div>
+              <div class="chip">Modern UI with smooth transitions</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Signup / Signin Modal-like view -->
+      <section id="view-signup" style="display:none;padding:40px 28px">
+        <div class="container">
+          <div class="section-title"><h3>Create your account</h3></div>
+          <div style="max-width:880px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+            <div class="card">
+              <h4>Sign Up</h4>
+              <div style="margin-top:12px">
+                <input id="su-username" placeholder="Pick a username" style="padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);width:100%;background:transparent;color:#fff" />
+                <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="signup()">Create Account</button>
+              </div>
+            </div>
+            <div class="card">
+              <h4>Sign In</h4>
+              <div style="margin-top:12px">
+                <input id="si-username" placeholder="Username" style="padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);width:100%;background:transparent;color:#fff" />
+                <button class="btn btn-ghost" style="margin-top:12px;width:100%" onclick="signin()">Sign In</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LANGUAGES -->
+      <section id="view-languages" style="display:none">
+        <div class="container">
+          <div class="section-title"><h3>Choose a language</h3><div class="badge">Logic-first challenges</div></div>
+          <div class="grid" id="lang-grid">
+            <!-- language cards injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- DIFFICULTY -->
+      <section id="view-difficulty" style="display:none;padding:24px 28px">
+        <div class="container">
+          <div class="section-title"><h3>Select difficulty</h3><div class="badge" id="selected-lang">Language</div></div>
+          <div class="grid">
+            <div class="card" onclick="chooseDifficulty('Beginner')"><img class="icon" src="https://img.icons8.com/ios-filled/50/ffffff/rocket.png"><div class="lang-name">Beginner</div><div class="lang-sub">Short entry-level logic tasks</div></div>
+            <div class="card" onclick="chooseDifficulty('Intermediate')"><img class="icon" src="https://img.icons8.com/ios-filled/50/ffffff/code.png"><div class="lang-name">Intermediate</div><div class="lang-sub">Longer puzzles & arrays</div></div>
+            <div class="card" onclick="chooseDifficulty('Advanced')"><img class="icon" src="https://img.icons8.com/ios-filled/50/ffffff/brain.png"><div class="lang-name">Advanced</div><div class="lang-sub">Algorithmic thinking & optimizations</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHALLENGE -->
+      <section id="view-challenge" style="display:none;padding:24px 28px">
+        <div class="container">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+              <div style="color:var(--muted);font-size:13px">Language • <span id="c-lang">JavaScript</span></div>
+              <h3 id="c-title">Sample Challenge</h3>
+            </div>
+            <div style="text-align:right">
+              <div style="color:var(--muted);font-size:13px">Difficulty • <span id="c-diff">Beginner</span></div>
+              <div style="margin-top:8px"><button class="btn btn-primary" onclick="saveSolved()">Mark Solved</button></div>
+            </div>
+          </div>
+
+          <div class="challenge-wrap">
+            <div>
+              <div class="problem card">
+                <h4 id="problem-title">Reverse the number</h4>
+                <p id="problem-desc">Write a function <code>reverseNum(n)</code> that takes an integer and returns the integer with digits reversed. Example: <code>123 → 321</code>. For negative numbers preserve the sign.</p>
+                <div style="margin-top:12px"><strong>Input:</strong> one integer • <strong>Output:</strong> one integer</div>
+              </div>
+
+              <div style="margin-top:14px;display:flex;gap:10px">
+                <button class="btn btn-ghost" onclick="showHint()">Show Hint</button>
+                <button class="btn btn-ghost" onclick="showSolution()">Show Solution</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="editor card">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div style="font-weight:700">Editor (JavaScript)</div>
+                  <div style="color:var(--muted);font-size:12px">Runnable in-browser</div>
+                </div>
+                <textarea id="code">
+// Example starter
+function reverseNum(n) {
+  // your code here
+}
+
+// test
+console.log(reverseNum(123)); // 321
+                </textarea>
+                <div class="run-row">
+                  <div style="display:flex;gap:8px">
+                    <button class="btn btn-primary" onclick="runCode()">Run</button>
+                    <button class="btn btn-ghost" onclick="resetEditor()">Reset</button>
+                  </div>
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <div class="chip">Last run: <span id="last-run">never</span></div>
+                  </div>
+                </div>
+                <div style="margin-top:10px" class="output" id="output">Output will show here</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" style="display:none;padding:24px 28px">
+        <div class="container">
+          <div class="section-title"><h3>Your Progress</h3><div class="badge" onclick="clearAppData()">Local Storage</div></div>
+          <div style="display:flex;gap:18px;flex-wrap:wrap">
+            <div class="stat">
+              <div style="color:var(--muted);font-size:12px">Solved</div>
+              <div class="num" id="stat-solved">0</div>
+            </div>
+            <div class="stat">
+              <div style="color:var(--muted);font-size:12px">Points</div>
+              <div class="num" id="stat-points">0</div>
+            </div>
+            <div class="stat">
+              <div style="color:var(--muted);font-size:12px">Your Badges</div>
+              <div id="badges" class="badge-display"></div>
+            </div>
+            
+          </div>
+
+          <div class="solved-list" id="solved-list"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      Built with ❤️ •  fully client-side (no backend)
+    </footer>
+  </div>
+
+  <script>
+    /* ---------- Data (sample challenges) ---------- */
+    const LANGUAGES = [
+      {id:'JavaScript', icon:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'},
+      {id:'Python', icon:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg'},
+      {id:'C++', icon:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg'},
+      {id:'Java', icon:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg'}
+    ];
+
+    const CHALLENGES = {
+      'JavaScript':{
+        'Beginner': [
+          {id:'js-b-1', title:'Reverse the number', desc:'Write a function reverseNum(n) that reverses digits and preserves sign. Example: -123 -> -321', template:`function reverseNum(n) {\n  // your code here\n}\n\nconsole.log(reverseNum(123)); // 321`}
+        ],
+        'Intermediate':[], 'Advanced':[]
+      }
+    };
+
+    /* ---------- Simple SPA nav ---------- */
+    function show(view){
+      document.querySelectorAll('main section').forEach(s=>s.style.display='none');
+      const el = document.getElementById('view-'+view);
+      if(el) el.style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
+      // update greet
+      const user = localStorage.getItem('cl_user');
+      document.getElementById('user-greet').innerText = user ? `Hi, ${user}` : '';
+    }
+    function nav(view){ show(view); }
+    function startFlow(){
+      const user = localStorage.getItem('cl_user');
+      if(!user) return show('signup');
+      nav('languages');
+    }
+
+    /* ---------- Sign up / sign in ---------- */
+    function signup(){
+      const u = document.getElementById('su-username').value.trim();
+      if(!u){ toast('Enter a username'); return; }
+      localStorage.setItem('cl_user',u);
+      localStorage.setItem('cl_points', '0');
+      toast('Welcome, '+u+' — account created locally');
+      nav('languages');
+      awardBadge(BADGE_DEFINITIONS.SIGNED_UP);
+    }
+    function signin(){
+      const u = document.getElementById('si-username').value.trim();
+      const saved = localStorage.getItem('cl_user');
+      if(u === saved){ toast('Signed in'); nav('languages'); }
+      else toast('User not found locally. Create an account first.');
+      awardBadge(BADGE_DEFINITIONS.SIGNED_IN);
+    }
+
+    /* ---------- Languages UI ---------- */
+    function renderLanguages(){
+      const grid = document.getElementById('lang-grid'); grid.innerHTML='';
+      LANGUAGES.forEach(l => {
+        const card = document.createElement('div'); card.className='card';
+        card.onclick = ()=>{ localStorage.setItem('cl_lang', l.id); chooseLanguage(l.id); };
+        card.innerHTML = `<img class=\"icon\" src=\"${l.icon}\" alt=\"${l.id}\" /><div class=\"lang-name\">${l.id}</div><div class=\"lang-sub\">Logic challenges</div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    function chooseLanguage(id){
+      document.getElementById('selected-lang').innerText = id;
+      localStorage.setItem('cl_lang', id);
+      nav('difficulty');
+      awardBadge(BADGE_DEFINITIONS.FIRST_LANGUAGE_PICK);
+    }
+
+    function chooseDifficulty(level){
+      localStorage.setItem('cl_diff', level);
+      // load first challenge for now
+      const lang = localStorage.getItem('cl_lang') || 'JavaScript';
+      const chal = (CHALLENGES[lang] && CHALLENGES[lang][level] && CHALLENGES[lang][level][0]) || CHALLENGES['JavaScript']['Beginner'][0];
+      loadChallenge(chal, lang, level);
+      nav('challenge');
+      awardBadge(BADGE_DEFINITIONS.FIRST_DIFFICULTY_PICK);
+    }
+
+    /* ---------- Challenge interactions ---------- */
+    function loadChallenge(chal, lang, diff){
+      document.getElementById('c-lang').innerText = lang;
+      document.getElementById('c-diff').innerText = diff;
+      document.getElementById('c-title').innerText = chal.title;
+      document.getElementById('problem-title').innerText = chal.title;
+      document.getElementById('problem-desc').innerText = chal.desc;
+      document.getElementById('code').value = chal.template;
+      document.getElementById('output').innerText = 'Output will show here';
+      document.getElementById('last-run').innerText = 'never';
+      localStorage.setItem('cl_current_challenge', JSON.stringify({id:chal.id, lang, diff}));
+    }
+
+    function runCode(){
+      const code = document.getElementById('code').value;
+      const outputEl = document.getElementById('output');
+      try{
+        // sandboxed eval: wrap in function to limit global scope
+        const wrapped = `(function(){\n${code}\n})();`;
+        // eslint-disable-next-line no-eval
+        const result = eval(wrapped);
+        outputEl.innerText = result === undefined ? 'Ran — check console (or return a value)' : JSON.stringify(result, null, 2);
+      }catch(e){ outputEl.innerText = 'Error: '+e.message; }
+      document.getElementById('last-run').innerText = new Date().toLocaleTimeString();
+      awardBadge(BADGE_DEFINITIONS.FIRST_RUN);
+    }
+
+    function resetEditor(){
+      const cur = JSON.parse(localStorage.getItem('cl_current_challenge')||'{}');
+      const lang = cur.lang || 'JavaScript';
+      const diff = cur.diff || 'Beginner';
+      const chal = (CHALLENGES[lang] && CHALLENGES[lang][diff] && CHALLENGES[lang][diff][0]) || CHALLENGES['JavaScript']['Beginner'][0];
+      if(chal) document.getElementById('code').value = chal.template;
+    }
+
+    function showHint(){ toast('Hint: Convert to string then reverse digits, remember negative sign.'); }
+    function showSolution(){
+      const sol = `function reverseNum(n){\n  const sign = n<0?-1:1;\n  const s = Math.abs(n).toString().split('').reverse().join('');\n  return sign * parseInt(s,10);\n}\nconsole.log(reverseNum(123)); // 321`;
+      if(confirm('Show solution in editor?')) document.getElementById('code').value = sol;
+      awardBadge(BADGE_DEFINITIONS.USED_HINT);
+    }
+
+    /* ---------- Progress & Dashboard ---------- */
+    function saveSolved(){
+      const cur = JSON.parse(localStorage.getItem('cl_current_challenge')||'{}');
+      if(!cur.id) { toast('No challenge loaded'); return; }
+      const key = `solved::${cur.lang}::${cur.diff}::${cur.id}`;
+      localStorage.setItem(key, JSON.stringify({when:Date.now()}));
+      // update points
+      const pts = parseInt(localStorage.getItem('cl_points')||'0',10) + 10;
+      localStorage.setItem('cl_points', pts);
+      toast('Marked solved! +10 points');
+      nav('dashboard'); loadDashboard();
+    }
+
+    function loadDashboard(){
+      const keys = Object.keys(localStorage).filter(k=>k.startsWith('solved::'));
+      document.getElementById('stat-solved').innerText = keys.length;
+      document.getElementById('stat-points').innerText = localStorage.getItem('cl_points')||0;
+      const list = document.getElementById('solved-list'); list.innerHTML='';
+      if(!keys.length) list.innerText = 'No solved challenges yet — try a beginner challenge!';
+      keys.forEach(k=>{
+        const d = JSON.parse(localStorage.getItem(k));
+        const parts = k.split('::');
+        const li = document.createElement('div');
+        li.style.padding='8px 0'; li.style.borderBottom='1px solid rgba(255,255,255,0.02)';
+        li.innerText = `${parts[1]} • ${parts[2]} • ${parts[3]} — ${new Date(d.when).toLocaleString()}`;
+        list.appendChild(li);
+      });
+      renderBadges();
+    }
+
+    /* ---------- Init ---------- */
+    document.addEventListener('DOMContentLoaded', ()=>{
+      renderLanguages();
+      const user = localStorage.getItem('cl_user');
+      if(user) document.getElementById('user-greet').innerText = `Hi, ${user}`;
+      // default landing view
+      show('landing');
+    });
+
+    /* ---------- keyboard shortcuts (nice touch) ---------- */
+    document.addEventListener('keydown',(e)=>{
+    if(e.ctrlKey && e.key === 'Enter') runCode();
+    if(e.key === 'Escape') show('landing');
+    });
+
+    /* ---------- Badge System (Fixed) ---------- */
+
+    const badgeList = JSON.parse(localStorage.getItem("BADGES") || "[]");
+
+    function getBadgeContainer() {
+    return document.getElementById("badges"); // always fetch fresh
+    }
+
+    function renderBadges() {
+    const container = getBadgeContainer();
+    if (!container) return; // not on dashboard yet
+
+    container.innerHTML = "";
+    badgeList.forEach(name => {
+    const b = document.createElement("div");
+    b.className = "badge";
+    b.textContent = name;
+    container.appendChild(b);
+    });
+    }
+
+    function awardBadge(name) {
+    if (!badgeList.includes(name)) {
+    badgeList.push(name);
+    localStorage.setItem("BADGES", JSON.stringify(badgeList));
+    }
+    }
+
+    /* ---------- Default Badge Names ---------- */
+    const BADGE_DEFINITIONS = {
+      FIRST_RUN: "First Code Run",
+      FIRST_SOLVE: "First Challenge Solved",
+      SOLVE_5: "Solved 5 Challenges",
+      USED_HINT: "Used a Hint",
+      USED_SOLUTION: "Viewed a Solution",
+      SIGNED_UP: "Signed Up",
+      SIGNED_IN: "Signed In",
+      FIRST_LANGUAGE_PICK: "First Language Chosen",
+      FIRST_DIFFICULTY_PICK: "First Difficulty Chosen"
+    };
+
+    /* ---------- Custom Toast System ---------- */
+    function toast(msg, duration = 5000) {
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.innerText = msg;
+
+    document.body.appendChild(t);
+
+    // Remove automatically after duration
+    setTimeout(() => {
+    t.remove();
+    }, duration);
+    }
+
+
+
+    document.querySelectorAll("button, input, textarea, select").forEach(el => {
+    el.addEventListener("focus", () => el.classList.add("focus-ring"));
+    el.addEventListener("blur", () => el.classList.remove("focus-ring"));
+    });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+  renderLanguages();
+  
+  const user = localStorage.getItem('cl_user');
+  const greet = document.getElementById('user-greet');
+
+  if (user) {
+    greet.innerText = `Hi, ${user}`;
+    greet.style.cursor = "pointer";
+
+    greet.addEventListener("click", () => {
+      nav('dashboard');
+      loadDashboard();
+    });
+  }
+
+  show('landing');
+  });
+
+  function clearAppData() {
+  Object.keys(localStorage).forEach(key => {
+  if (
+  key.startsWith('cl_') ||
+  key.startsWith('solved::') ||
+  key === "BADGES"
+  ) {
+  localStorage.removeItem(key);
+  }
+  });
+
+  toast("All data cleared");
+  }
+
+
+  </script>
+</body>
+</html>
